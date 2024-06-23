@@ -44,4 +44,4 @@ if __name__ == "__main__":
         send_message()
     else:
         print("You have already committed today!")
-        send_message("You have already committed today!")
+        send_message(f"You have already committed today as of {datetime.now().strftime('%H:%M')}!")
