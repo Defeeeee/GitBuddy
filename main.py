@@ -1,64 +1,62 @@
 import os
-from datetime import datetime, date
-from time import sleep
-
 import requests
+from datetime import datetime, timedelta, date
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
-headers = {
-    "Authorization": "Bearer " + os.getenv("WHATSAPP_ACCESS_TOKEN"),
-    "Content-Type": "application/json",
-}
+# Constants (for clarity)
+WHATSAPP_API_URL = os.getenv("URL")
+WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN")
+PHONE_NUMBER = os.getenv("PHONE_NUMBER")
+GITHUB_USERNAME = "defeeeee"  # Replace with your actual GitHub username
+CHECK_INTERVAL_MINUTES = 15  # Check every 15 minutes after 4 PM
+MAX_CHECKS = 24  # Maximum number of checks (15 minutes * 24 = 6 hours)
 
 
-def send_message(*args):
-    if not args:
-        message = f"Hello! Today is {datetime.today().strftime('%B %d, %Y')} it's {datetime.now().strftime('%H:%M')}. And you haven't committed to GitHub yet! 🤔"
-    else:
-        message = args[0]
+# Function to send WhatsApp message
+def send_whatsapp_message(message):
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_ACCESS_TOKEN}",
+        "Content-Type": "application/json",
+    }
     payload = {
         "messaging_product": "whatsapp",
-        "to": os.getenv("PHONE_NUMBER"),  # Recipient's phone number in international format
+        "to": PHONE_NUMBER,
         "type": "text",
-        "text": {
-            "body": message
-        }
+        "text": {"body": message},
     }
-    response = requests.post(os.getenv("URL"), headers=headers, json=payload)
+    response = requests.post(WHATSAPP_API_URL, headers=headers, json=payload)
 
     if response.status_code == 200:
         print("WhatsApp message sent successfully!")
     else:
-        print("Error sending message:", response.status_code, response.text)
+        print(f"Error sending message: {response.status_code} - {response.text}")
 
 
-def waitAndCheck():
-    if not datetime.now().strftime("%H:%M") == "23:00":
-        sleep(3600)
-        if requests.get(f"https://api.github.com/search/commits?q=author:defeeeee+author-date:{date.today()}").json()[
-            "total_count"] == 0:
-            send_message()
-            waitAndCheck()
-        else:
-            print("You have already committed today!")
-            send_message(f"You have already committed today as of {datetime.now().strftime('%H:%M')}!")
+# Function to check for commits on GitHub
+def check_github_commits():
+    today = date.today()
+    url = f"https://api.github.com/search/commits?q=author:{GITHUB_USERNAME} author-date:{today}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        return response.json()["total_count"] > 0
     else:
-        sleep(3000)
-        if requests.get(f"https://api.github.com/search/commits?q=author:defeeeee+author-date:{date.today()}").json()[
-            "total_count"] == 0:
-            send_message()
-        else:
-            print("You have already committed today!")
-            send_message(f"You have already committed today as of {datetime.now().strftime('%H:%M')}!")
+        print(f"Error checking GitHub commits: {response.status_code} - {response.text}")
+        return False  # Assume no commits in case of error
 
 
+# Main logic
 if __name__ == "__main__":
-    if requests.get(f"https://api.github.com/search/commits?q=author:defeeeee+author-date:{date.today()}").json()[
-        "total_count"] == 0:
-        send_message()
-        waitAndCheck()
-    else:
-        print("You have already committed today!")
-        send_message(f"You have already committed today as of {datetime.now().strftime('%H:%M')}!")
+    check_count = 0
+    while check_count < MAX_CHECKS:  # Only check after 4 PM
+        if check_github_commits():
+            break  # Stop checking if a commit is found
+        else:
+            send_whatsapp_message(
+                f"It's {datetime.now().strftime('%H:%M')}. You haven't committed to GitHub yet today! 🤔")
+            check_count += 1
+            sleep_time = CHECK_INTERVAL_MINUTES * 60  # Convert minutes to seconds
+            time.sleep(sleep_time)  # Wait before checking again
