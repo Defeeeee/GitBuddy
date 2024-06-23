@@ -53,7 +53,8 @@ if __name__ == "__main__":
     check_count = 0
     while check_count < MAX_CHECKS:  # Only check after 4 PM
         if check_github_commits():
-            print("You've committed to GitHub today! 😄")
+            send_whatsapp_message(
+                f"Yay! 🎉 You've committed to GitHub today! 🚀")
             break  # Stop checking if a commit is found
         else:
             send_whatsapp_message(
