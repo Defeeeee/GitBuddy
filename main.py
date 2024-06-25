@@ -10,7 +10,7 @@ load_dotenv()
 WHATSAPP_API_URL = os.getenv("URL")
 WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN")
 PHONE_NUMBER = os.getenv("PHONE_NUMBER")
-GITHUB_USERNAME = "defeeeee"  # Replace with your actual GitHub username
+GITHUB_USERNAME = "Defeeeee"  # Replace with your actual GitHub username
 CHECK_INTERVAL_MINUTES = 15  # Check every 15 minutes after 4 PM
 MAX_CHECKS = 24  # Maximum number of checks (15 minutes * 24 = 6 hours)
 
