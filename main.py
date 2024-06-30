@@ -10,23 +10,49 @@ load_dotenv()
 WHATSAPP_API_URL = os.getenv("URL")
 WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN")
 PHONE_NUMBER = os.getenv("PHONE_NUMBER")
-GITHUB_USERNAME = "Defeeeee"  # Replace with your actual GitHub username
+GITHUB_USERNAME = "defeeeee"  # Replace with your actual GitHub username
 CHECK_INTERVAL_MINUTES = 15  # Check every 15 minutes after 4 PM
 MAX_CHECKS = 24  # Maximum number of checks (15 minutes * 24 = 6 hours)
 
 
 # Function to send WhatsApp message
-def send_whatsapp_message(message):
+def send_whatsapp_message(template_name="not_commited", params=None):
     headers = {
         "Authorization": f"Bearer {WHATSAPP_ACCESS_TOKEN}",
         "Content-Type": "application/json",
     }
-    payload = {
-        "messaging_product": "whatsapp",
-        "to": PHONE_NUMBER,
-        "type": "text",
-        "text": {"body": message},
-    }
+
+    if template_name == "not_commited" and params is not None:
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": PHONE_NUMBER,
+            "type": "template",
+            "template": {
+                "name": template_name,  # Name of your approved message template
+                "language": {"code": "en_US"},
+                "components": [
+                    {
+                        "type": "body",
+                        "parameters": [{"type": "text", "text": params}]
+                    }
+                ]
+            }
+        }
+    elif template_name == "commited":
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": PHONE_NUMBER,
+            "type": "template",
+            "template": {
+                "name": template_name,  # Name of your approved message template
+                "language": {"code": "en_US"},
+                "components": [
+                    {
+                        "type": "body",
+                    }
+                ]
+            }
+        }
     response = requests.post(WHATSAPP_API_URL, headers=headers, json=payload)
 
     if response.status_code == 200:
@@ -54,12 +80,10 @@ if __name__ == "__main__":
     check_count = 0
     while check_count < MAX_CHECKS:  # Only check after 4 PM
         if check_github_commits():
-            send_whatsapp_message(
-                f"Yay! 🎉 You've committed to GitHub today! 🚀")
+            send_whatsapp_message("commited")
             break  # Stop checking if a commit is found
         else:
-            send_whatsapp_message(
-                f"It's {datetime.now().strftime('%H:%M')}. You haven't committed to GitHub yet today! 🤔")
+            send_whatsapp_message("not_commited", datetime.now().strftime("%H:%M"))
             check_count += 1
             sleep_time = CHECK_INTERVAL_MINUTES * 60  # Convert minutes to seconds
             time.sleep(sleep_time)  # Wait before checking again
