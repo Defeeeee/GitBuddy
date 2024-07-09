@@ -1,7 +1,7 @@
 import os
 import random
 import requests
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from dotenv import load_dotenv
 import time
 
@@ -14,7 +14,10 @@ class GitHubCommitChecker:
         self.github_username = username
 
     def has_commits_today(self):
-        today = date.today()
+        if datetime.now().hour < 20:
+            today = date.today()
+        else:
+            today = datetime.now(timezone.utc).date()
         url = f"https://api.github.com/search/commits?q=author:{self.github_username} author-date:{today}"
         response = requests.get(url)
 
