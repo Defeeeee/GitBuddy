@@ -60,7 +60,6 @@ class WhatsAppNotifier:
         response = requests.post(self.api_url, headers=headers, json=payload)
 
         if response.status_code == 200:
-            print("WhatsApp message sent successfully!")
             print(response.json())
         else:
             print(f"Error sending message: {response.status_code} - {response.text}")
