@@ -15,7 +15,7 @@ GitHubReminder is a simple yet handy script that reminds you to make your daily 
 
 1. **Clone the Repository:**
    ```
-   git clone https://github.com/Defeeeee/GithubReminder.git
+   git clone https://github.com/Defeeeee/GithubReminder
    cd GitHubReminder
    ```
 
