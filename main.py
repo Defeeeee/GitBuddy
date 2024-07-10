@@ -48,7 +48,9 @@ class GitHubCommitChecker:
                     # convert to utc time 2024-07-09T23:58:09-03:00
                     commit_time = commit_time.astimezone(timezone.utc)
 
-                    if commit_time.hour > 3:
+                    print(commit_time.hour)
+
+                    if commit_time.hour >= 3:
                         return True
                 return False
 
