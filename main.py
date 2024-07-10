@@ -14,15 +14,44 @@ class GitHubCommitChecker:
         self.github_username = username
 
     def has_commits_today(self):
-        if datetime.now().hour < 20:
+
+        if datetime.now().hour < 21:
             today = date.today()
+            tmr = False
         else:
             today = datetime.now(timezone.utc).date()
+            tmr = True
         url = f"https://api.github.com/search/commits?q=author:{self.github_username} author-date:{today}"
         response = requests.get(url)
 
         if response.status_code == 200:
-            return response.json()["total_count"] > 0
+            commits = response.json()["items"]
+            if tmr:
+
+                for commit in commits:
+                    commit_time_str = commit["commit"]["author"]["date"]
+                    commit_time = datetime.fromisoformat(commit_time_str)
+
+                    commit_time = commit_time.astimezone(timezone.utc)
+
+                    print(commit_time.hour)
+                    print(commit_time)
+
+                    if commit_time.hour < 3:
+                        return True  # Found a commit before 3 AM and current time is before 9 PM
+                return False
+            else:
+                for commit in commits:
+                    commit_time_str = commit["commit"]["author"]["date"]
+                    commit_time = datetime.fromisoformat(commit_time_str)
+
+                    # convert to utc time 2024-07-09T23:58:09-03:00
+                    commit_time = commit_time.astimezone(timezone.utc)
+
+                    if commit_time.hour > 3:
+                        return True
+                return False
+
         else:
             print(f"Error checking GitHub commits: {response.status_code} - {response.text}")
             return False  # Assume no commits in case of error
