@@ -1,8 +1,8 @@
-# GitHubReminder
+# GitBuddy
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-GitHubReminder is a simple yet handy script that reminds you to make your daily GitHub commits. If you haven't committed by a specified time each day, it sends you a friendly WhatsApp message as a nudge.
+GitBuddy is a simple yet handy script that reminds you to make your daily GitHub commits. If you haven't committed by a specified time each day, it sends you a friendly WhatsApp message as a nudge.
 
 ## Features
 
@@ -15,8 +15,8 @@ GitHubReminder is a simple yet handy script that reminds you to make your daily 
 
 1. **Clone the Repository:**
    ```
-   git clone https://github.com/Defeeeee/GithubReminder
-   cd GitHubReminder
+   git clone https://github.com/Defeeeee/GitBuddy
+   cd GitBuddy
    ```
 
 2. **Create and Activate a Virtual Environment (Recommended):**
