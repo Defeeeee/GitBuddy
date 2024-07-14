@@ -1,7 +1,7 @@
-# GitBuddy
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
+<br>
+<img src="https://github.com/user-attachments/assets/b8a0a00f-951f-48ee-b198-a5224a244562" width="300">
+<br>
 GitBuddy is a simple yet handy script that reminds you to make your daily GitHub commits. If you haven't committed by a specified time each day, it sends you a friendly WhatsApp message as a nudge.
 
 ## Features
