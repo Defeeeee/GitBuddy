@@ -124,6 +124,12 @@ def configure_gitbuddy():
 
     print("\nConfiguration complete! GitBuddy is ready to remind you about commits.")
 
+    try:
+        os.remove(os.path.abspath(__file__))  # Delete the current script file
+        print("Configuration script deleted successfully.")
+    except OSError as e:
+        print(f"Error deleting configuration script: {e}")
+
 
 if __name__ == "__main__":
     configure_gitbuddy()
