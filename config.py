@@ -82,7 +82,7 @@ def adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone):
         return cron_schedule
 
     # Parse the user-provided time
-    user_time_str = f"{cron_schedule.split()[1]}:{cron_schedule.split()[0]}" # HH:MM
+    user_time_str = f"{cron_schedule.split()[1]}:{cron_schedule.split()[0]}"  # HH:MM
     user_datetime = datetime.strptime(user_time_str, "%H:%M").replace(tzinfo=user_timezone)
 
     # Convert user's time to system time
@@ -96,8 +96,20 @@ def adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone):
 
 
 def configure_gitbuddy():
-    """Configures GitBuddy by collecting env values, timezone, and setting up the cron job."""
+    """Configures GitBuddy after confirmation and timezone adjustment."""
     print("\n--- GitBuddy Configuration ---")
+
+    # Check if .env file already exists
+    if os.path.exists(".env"):
+        while True:
+            overwrite = input(".env file already exists. Overwrite? (yes/no): ").lower()
+            if overwrite in ["yes", "y"]:
+                break
+            elif overwrite in ["no", "n"]:
+                print("Configuration aborted. Exiting.")
+                return
+            else:
+                print("Invalid input. Please enter 'yes' or 'no'.")
 
     env_data = get_env_values()
     cron_schedule = get_cron_schedule()
@@ -106,7 +118,7 @@ def configure_gitbuddy():
     # Adjust cron schedule to system time
     cron_schedule = adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone)
 
-    env_data['TIMEZONE'] = user_timezone_str  # Store the timezone in the .env file
+    env_data["TIMEZONE"] = user_timezone_str  # Store the timezone in the .env file
 
     # Write to .env
     with open(".env", "w") as f:
@@ -124,11 +136,20 @@ def configure_gitbuddy():
 
     print("\nConfiguration complete! GitBuddy is ready to remind you about commits.")
 
-    try:
-        os.remove(os.path.abspath(__file__))  # Delete the current script file
-        print("Configuration script deleted successfully.")
-    except OSError as e:
-        print(f"Error deleting configuration script: {e}")
+    # Ask for confirmation before deleting the script
+    while True:
+        delete_script = input("Delete configuration script? (yes/no): ").lower()
+        if delete_script in ["yes", "y"]:
+            try:
+                os.remove(os.path.abspath(__file__))
+                print("Configuration script deleted successfully.")
+            except OSError as e:
+                print(f"Error deleting configuration script: {e}")
+            break
+        elif delete_script in ["no", "n"]:
+            break
+        else:
+            print("Invalid input. Please enter 'yes' or 'no'.")
 
 
 if __name__ == "__main__":
