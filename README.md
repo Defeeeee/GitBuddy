@@ -14,7 +14,7 @@ GitBuddy is a simple yet handy script that reminds you to make your daily GitHub
 
 1. **Clone the Repository:**
    ```bash
-   git clone [https://github.com/Defeeeee/GitBuddy](https://github.com/Defeeeee/GitBuddy)
+   git clone https://github.com/Defeeeee/GitBuddy.git
    cd GitBuddy
    ```
 
