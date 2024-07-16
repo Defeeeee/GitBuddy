@@ -75,23 +75,24 @@ def get_user_timezone():
 def adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone):
     """Adjusts the cron schedule based on the system's and user's timezones."""
     try:
-        system_timezone_str = subprocess.check_output(["date", "+%z"]).decode().strip()  # Get system timezone
-        print(f"System timezone: {system_timezone_str}")
-        system_timezone = timezone(timedelta(hours=int(system_timezone_str[:1]), minutes=int(system_timezone_str[3:])))
+        system_timezone_str = subprocess.check_output(["date", "+%z"]).decode().strip()
+        system_timezone_offset = int(system_timezone_str[:3]) * 60 + int(system_timezone_str[3:])
     except (subprocess.CalledProcessError, ValueError) as e:
         print(f"Error getting or parsing system timezone: {e}. Using unadjusted schedule.")
-        return cron_schedule  # Fallback to the original schedule if there's an error
+        return cron_schedule
 
-    # Calculate the time difference and adjust the hour accordingly
-    user_time = datetime.now(user_timezone)
-    system_time = datetime.now(system_timezone)
-    offset_hours = (system_time - user_time).seconds // 3600
+    # Parse the user-provided time
+    user_time_str = f"{cron_schedule.split()[1]}:{cron_schedule.split()[0]}" # HH:MM
+    user_datetime = datetime.strptime(user_time_str, "%H:%M").replace(tzinfo=user_timezone)
 
+    # Convert user's time to system time
+    system_datetime = user_datetime.astimezone(timezone(timedelta(minutes=system_timezone_offset)))
+
+    # Update the cron schedule with the adjusted hour and minute
     adjusted_schedule = cron_schedule.split()
-    adjusted_schedule[1] = str(
-        (int(adjusted_schedule[1]) + offset_hours) % 24)  # Adjust hour, wrapping around if necessary
-    adjusted_schedule = " ".join(adjusted_schedule)
-    return adjusted_schedule
+    adjusted_schedule[1] = str(system_datetime.hour)
+    adjusted_schedule[0] = str(system_datetime.minute)
+    return " ".join(adjusted_schedule)
 
 
 def configure_gitbuddy():
