@@ -46,6 +46,8 @@ class GitHubCommitChecker:
                 date_str = re.sub(r"(\d{2}:\d{2})$", lambda x: x.group(1).replace(":", ""), date_str)
 
                 commit_date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+                today = datetime.now().strftime("%Y-%m-%d")
                 today = datetime.strptime(today, "%Y-%m-%d").date()
 
                 if commit_date.date() == today:
