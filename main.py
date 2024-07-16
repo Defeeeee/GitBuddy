@@ -1,7 +1,7 @@
 import os
 import random
 import requests
-from datetime import datetime, date, timezone, timedelta
+from datetime import datetime, date, timezone
 from dotenv import load_dotenv
 import time
 
