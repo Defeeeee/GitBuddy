@@ -120,6 +120,18 @@ def configure_gitbuddy():
 
     env_data["TIMEZONE"] = user_timezone_str  # Store the timezone in the .env file
 
+    # Ask if using executable
+    while True:
+        using_exe = input("Are you running GitBuddy as an executable? (yes/no): ").lower()
+        if using_exe in ["yes", "y"]:
+            command = os.path.abspath("main.exe")  # Assuming the executable is named main.exe
+            break
+        elif using_exe in ["no", "n"]:
+            command = f"python3 {os.path.abspath('main_script.py')}"
+            break
+        else:
+            print("Invalid input. Please enter 'yes' or 'no'.")
+
     # Write to .env
     with open(".env", "w") as f:
         for key, value in env_data.items():
@@ -128,7 +140,7 @@ def configure_gitbuddy():
     # Set up cron job (using python-crontab)
     user_cron = CronTab(user=True)
     job = user_cron.new(
-        command=f"python {os.path.abspath('main_script.py')}",
+        command=command,  # Use the appropriate command based on whether it's an executable or not
         comment="GitBuddy Commit Reminder"
     )
     job.setall(cron_schedule)
@@ -136,20 +148,21 @@ def configure_gitbuddy():
 
     print("\nConfiguration complete! GitBuddy is ready to remind you about commits.")
 
-    # Ask for confirmation before deleting the script
-    while True:
-        delete_script = input("Delete configuration script? (yes/no): ").lower()
-        if delete_script in ["yes", "y"]:
-            try:
-                os.remove(os.path.abspath(__file__))
-                print("Configuration script deleted successfully.")
-            except OSError as e:
-                print(f"Error deleting configuration script: {e}")
-            break
-        elif delete_script in ["no", "n"]:
-            break
-        else:
-            print("Invalid input. Please enter 'yes' or 'no'")
+    # Ask for confirmation before deleting the script (only if not running as executable)
+    if using_exe not in ["yes", "y"]:
+        while True:
+            delete_script = input("Delete configuration script? (yes/no): ").lower()
+            if delete_script in ["yes", "y"]:
+                try:
+                    os.remove(os.path.abspath(__file__))
+                    print("Configuration script deleted successfully.")
+                except OSError as e:
+                    print(f"Error deleting configuration script: {e}")
+                break
+            elif delete_script in ["no", "n"]:
+                break
+            else:
+                print("Invalid input. Please enter 'yes' or 'no'.")
 
 
 if __name__ == "__main__":
