@@ -149,7 +149,7 @@ def configure_gitbuddy():
         elif delete_script in ["no", "n"]:
             break
         else:
-            print("Invalid input. Please enter 'yes' or 'no'.")
+            print("Invalid input. Please enter 'yes' or 'no'")
 
 
 if __name__ == "__main__":
