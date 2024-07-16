@@ -1,2 +1,2 @@
-python-dotenv>=1.0.1
-python-crontab>=2.4.0
+python-dotenv
+python-crontab
