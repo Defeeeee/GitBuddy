@@ -1,11 +1,11 @@
 import os
 import random
 import re
+import time
+from datetime import datetime, timezone, timedelta
 
 import requests
-from datetime import datetime, date, timezone, timedelta
 from dotenv import load_dotenv
-import time
 
 """
 Project Name: GitBuddy
@@ -26,6 +26,7 @@ load_dotenv()
 user_timezone_str = os.getenv("TIMEZONE")
 offset_hours, offset_minutes = map(int, user_timezone_str.split(':'))
 user_timezone = timezone(timedelta(hours=offset_hours, minutes=offset_minutes))
+
 
 class GitHubCommitChecker:
     def __init__(self, username):
@@ -105,9 +106,8 @@ class WhatsAppNotifier:
 
 if __name__ == "__main__":
 
-
     # Create a GitHubCommitChecker object
-    github_checker = GitHubCommitChecker("defeeeee")
+    github_checker = GitHubCommitChecker(os.getenv("GITHUB_USERNAME"))
     # Create a WhatsAppNotifier object
     whatsapp_notifier = WhatsAppNotifier(
         os.getenv("URL"), os.getenv("WHATSAPP_ACCESS_TOKEN"), os.getenv("PHONE_NUMBER")
