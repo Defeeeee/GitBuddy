@@ -38,7 +38,10 @@ class GitHubCommitChecker:
                 return False
 
             for commit in commits:
-                commit_date = datetime.strptime(commit["commit"]["author"]["date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                try:
+                    commit_date = datetime.strptime(commit["commit"]["author"]["date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                except ValueError:
+                    commit_date = datetime.strptime(commit["commit"]["author"]["date"], "%Y-%m-%dT%H:%M:%S%z")
                 today = datetime.strptime(today, "%Y-%m-%d").date()
 
                 if commit_date.date() == today:
