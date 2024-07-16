@@ -99,17 +99,14 @@ if __name__ == "__main__":
         os.getenv("URL"), os.getenv("WHATSAPP_ACCESS_TOKEN"), os.getenv("PHONE_NUMBER")
     )
 
-    check_count = 0
-    max_checks = 24
     check_interval_minutes = 30
 
     # Start the loop to check for commits and send reminders
-    while check_count < max_checks:
+    while datetime.now().hour < 23:
         if github_checker.has_commits_today():
             whatsapp_notifier.send_message("commited")
             break
         else:
             template = random.choice(whatsapp_notifier.templates)
             whatsapp_notifier.send_message(template, datetime.now().strftime("%H:%M"))
-            check_count += 1
             time.sleep(check_interval_minutes * 60)
