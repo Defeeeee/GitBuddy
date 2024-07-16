@@ -124,7 +124,7 @@ def configure_gitbuddy():
     while True:
         using_exe = input("Are you running GitBuddy as an executable? (yes/no): ").lower()
         if using_exe in ["yes", "y"]:
-            command = os.path.abspath("main.exe")  # Assuming the executable is named main.exe
+            command = os.path.abspath("main")  # Assuming the executable is named main.exe
             break
         elif using_exe in ["no", "n"]:
             command = f"python3 {os.path.abspath('main_script.py')}"
