@@ -3,7 +3,7 @@ import random
 import re
 
 import requests
-from datetime import datetime, date, timezone
+from datetime import datetime, date, timezone, timedelta
 from dotenv import load_dotenv
 import time
 
@@ -23,6 +23,10 @@ The script runs in a loop, checking for commits at a specified interval and send
 
 load_dotenv()
 
+user_timezone_str = os.getenv("TIMEZONE")
+offset_hours, offset_minutes = map(int, user_timezone_str.split(':'))
+user_timezone = timezone(timedelta(hours=offset_hours, minutes=offset_minutes))
+
 class GitHubCommitChecker:
     def __init__(self, username):
         self.github_username = username
@@ -32,7 +36,6 @@ class GitHubCommitChecker:
         today = datetime.now().astimezone(timezone.utc).strftime("%Y-%m-%d")
         url = f"https://api.github.com/search/commits?q=author:{self.github_username} author-date:{today}"
         response = requests.get(url)
-        today = date.today().strftime("%Y-%m-%d")
 
         if response.status_code == 200:
             commits = response.json()["items"]
@@ -47,7 +50,7 @@ class GitHubCommitChecker:
 
                 commit_date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
 
-                today = datetime.now().strftime("%Y-%m-%d")
+                today = datetime.now().astimezone(user_timezone).strftime("%Y-%m-%d")
                 today = datetime.strptime(today, "%Y-%m-%d").date()
 
                 if commit_date.date() == today:
@@ -101,6 +104,8 @@ class WhatsAppNotifier:
 
 
 if __name__ == "__main__":
+
+
     # Create a GitHubCommitChecker object
     github_checker = GitHubCommitChecker("defeeeee")
     # Create a WhatsAppNotifier object
@@ -117,5 +122,5 @@ if __name__ == "__main__":
             break
         else:
             template = random.choice(whatsapp_notifier.templates)
-            whatsapp_notifier.send_message(template, datetime.now().strftime("%H:%M"))
+            whatsapp_notifier.send_message(template, datetime.now().astimezone(user_timezone).strftime("%H:%M"))
             time.sleep(check_interval_minutes * 60)
