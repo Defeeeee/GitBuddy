@@ -1,7 +1,7 @@
 import os
-from datetime import timedelta, timezone
-
+import subprocess
 from crontab import CronTab
+from datetime import datetime, timedelta, timezone
 
 
 def get_env_values():
@@ -25,7 +25,7 @@ def get_env_values():
 
 
 def get_cron_schedule():
-    """Interactively gets the desired cron schedule from the user."""
+    """Interactively gets the desired cron schedule from the user in their local time."""
     print("\n--- Cron Job Scheduling ---")
     while True:
         schedule_type = input("Choose schedule type (daily, weekly, hourly, or custom): ").lower()
@@ -66,10 +66,31 @@ def get_user_timezone():
         try:
             utc_offset_str = input("Enter your UTC timezone offset (e.g., '-03:00', '+05:30'): ")
             offset_hours, offset_minutes = map(int, utc_offset_str.split(':'))
-            timezone(timedelta(hours=offset_hours, minutes=offset_minutes))
-            return utc_offset_str
+            user_timezone = timezone(timedelta(hours=offset_hours, minutes=offset_minutes))
+            return user_timezone, utc_offset_str
         except ValueError:
             print("Invalid timezone format. Please use the format '+/-HH:MM'.")
+
+
+def adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone):
+    """Adjusts the cron schedule based on the system's and user's timezones."""
+    try:
+        system_timezone_str = subprocess.check_output(["date", "+%z"]).decode().strip()  # Get system timezone
+        system_timezone = timezone(timedelta(hours=int(system_timezone_str[:3]), minutes=int(system_timezone_str[3:])))
+    except (subprocess.CalledProcessError, ValueError) as e:
+        print(f"Error getting or parsing system timezone: {e}. Using unadjusted schedule.")
+        return cron_schedule  # Fallback to the original schedule if there's an error
+
+    # Calculate the time difference and adjust the hour accordingly
+    user_time = datetime.now(user_timezone)
+    system_time = datetime.now(system_timezone)
+    offset_hours = (system_time - user_time).seconds // 3600
+
+    adjusted_schedule = cron_schedule.split()
+    adjusted_schedule[1] = str(
+        (int(adjusted_schedule[1]) + offset_hours) % 24)  # Adjust hour, wrapping around if necessary
+    adjusted_schedule = " ".join(adjusted_schedule)
+    return adjusted_schedule
 
 
 def configure_gitbuddy():
@@ -78,8 +99,12 @@ def configure_gitbuddy():
 
     env_data = get_env_values()
     cron_schedule = get_cron_schedule()
-    user_timezone = get_user_timezone()
-    env_data['TIMEZONE'] = user_timezone
+    user_timezone, user_timezone_str = get_user_timezone()
+
+    # Adjust cron schedule to system time
+    cron_schedule = adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone)
+
+    env_data['TIMEZONE'] = user_timezone_str  # Store the timezone in the .env file
 
     # Write to .env
     with open(".env", "w") as f:
@@ -89,7 +114,7 @@ def configure_gitbuddy():
     # Set up cron job (using python-crontab)
     user_cron = CronTab(user=True)
     job = user_cron.new(
-        command=f"python {os.path.abspath('main.py')}",
+        command=f"python {os.path.abspath('main_script.py')}",
         comment="GitBuddy Commit Reminder"
     )
     job.setall(cron_schedule)
