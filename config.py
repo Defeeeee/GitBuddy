@@ -67,7 +67,7 @@ def configure_gitbuddy():
     # Set up cron job
     user_cron = CronTab(user=True)
     job = user_cron.new(
-        command=f"python {os.path.abspath('main_script.py')}",
+        command=f"python {os.path.abspath('main.py')}",
         comment="GitBuddy Commit Reminder"
     )
     job.setall(cron_schedule)

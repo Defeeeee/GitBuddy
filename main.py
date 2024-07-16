@@ -30,7 +30,7 @@ class GitHubCommitChecker:
         today = datetime.now().astimezone(timezone.utc).strftime("%Y-%m-%d")
         url = f"https://api.github.com/search/commits?q=author:{self.github_username} author-date:{today}"
         response = requests.get(url)
-        today = date.today()
+        today = date.today().strftime("%Y-%m-%d")
 
         if response.status_code == 200:
             commits = response.json()["items"]
