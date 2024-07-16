@@ -76,7 +76,7 @@ def adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone):
     """Adjusts the cron schedule based on the system's and user's timezones."""
     try:
         system_timezone_str = subprocess.check_output(["date", "+%z"]).decode().strip()  # Get system timezone
-        system_timezone = timezone(timedelta(hours=int(system_timezone_str[:3]), minutes=int(system_timezone_str[3:])))
+        system_timezone = timezone(timedelta(hours=int(system_timezone_str[:1]), minutes=int(system_timezone_str[3:])))
     except (subprocess.CalledProcessError, ValueError) as e:
         print(f"Error getting or parsing system timezone: {e}. Using unadjusted schedule.")
         return cron_schedule  # Fallback to the original schedule if there's an error
