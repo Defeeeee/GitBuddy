@@ -107,30 +107,21 @@ def get_user_timezone():
 
 def adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone):
     """Adjusts the cron schedule based on the system's and user's timezones."""
-
-    # Get System Timezone:
     try:
-        system_timezone_str = subprocess.check_output(["date", "+%z"]).decode().strip()  # e.g., "-0400"
-        system_timezone_offset = int(system_timezone_str[:3]) * 60 + int(
-            system_timezone_str[3:])  # Offset in minutes
+        system_timezone_str = subprocess.check_output(["date", "+%z"]).decode().strip()
+        system_timezone_offset = int(system_timezone_str[:3]) * 60 + int(system_timezone_str[3:])
     except (subprocess.CalledProcessError, ValueError) as e:
         print(f"Error getting or parsing system timezone: {e}. Using unadjusted schedule.")
-        return cron_schedule  # Fallback if there's an error
-
-    # Parse User-Provided Time:
-    user_time_parts = cron_schedule.split()[:2]  # Get minute and hour parts
-    try:
-        user_hour = int(user_time_parts[1])
-        user_minute = int(user_time_parts[0])
-    except (IndexError, ValueError) as e:
-        print(f"Error parsing user-provided time: {e}. Using unadjusted schedule.")
         return cron_schedule
 
-    # Create datetime objects for easier manipulation:
-    user_datetime = datetime.now(user_timezone).replace(hour=user_hour, minute=user_minute, second=0, microsecond=0)
+    # Parse the user-provided time
+    user_time_str = f"{cron_schedule.split()[1]}:{cron_schedule.split()[0]}" # HH:MM
+    user_datetime = datetime.strptime(user_time_str, "%H:%M").replace(tzinfo=user_timezone)
+
+    # Convert user's time to system time
     system_datetime = user_datetime.astimezone(timezone(timedelta(minutes=system_timezone_offset)))
 
-    # Adjust the cron schedule:
+    # Update the cron schedule with the adjusted hour and minute
     adjusted_schedule = cron_schedule.split()
     adjusted_schedule[1] = str(system_datetime.hour)
     adjusted_schedule[0] = str(system_datetime.minute)
@@ -162,7 +153,7 @@ def configure_gitbuddy():
     user_timezone, user_timezone_str = get_user_timezone()
 
     # Adjust cron schedule to system time
-    adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone)
+    cron_schedule = adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone)
 
     env_data["TIMEZONE"] = user_timezone_str  # Store the timezone in the .env file
 
