@@ -1,7 +1,36 @@
 import os
 import subprocess
-from crontab import CronTab
 from datetime import datetime, timedelta, timezone
+
+import requests
+from crontab import CronTab
+
+
+def download_files():
+    """Downloads main.py and requirements.txt from the GitHub repository."""
+    base_url = "https://raw.githubusercontent.com/Defeeeee/GitBuddy/master/"  # Replace with your actual repo URL
+    files = ["main.py", "requirements.txt"]
+    for file_name in files:
+        url = base_url + file_name
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            with open(file_name, "w") as f:
+                f.write(response.text)
+            print(f"{file_name} downloaded successfully.")
+        except requests.exceptions.RequestException as e:
+            print(f"Error downloading {file_name}: {e}")
+            exit(1)
+
+
+def install_dependencies():
+    """Installs required dependencies silently from requirements.txt."""
+    try:
+        subprocess.run(["pip", "install", "-r", "requirements.txt", "-q"], check=True)  # -q for quiet mode
+        print("Dependencies installed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error installing dependencies: {e}")
+        exit(1)
 
 
 def get_env_values():
@@ -67,28 +96,41 @@ def get_user_timezone():
             utc_offset_str = input("Enter your UTC timezone offset (e.g., '-03:00', '+05:30'): ")
             offset_hours, offset_minutes = map(int, utc_offset_str.split(':'))
             user_timezone = timezone(timedelta(hours=offset_hours, minutes=offset_minutes))
+
+            # Additional validation for valid timezones
+            datetime.now(user_timezone)  # Test if the timezone is valid
+
             return user_timezone, utc_offset_str
         except ValueError:
-            print("Invalid timezone format. Please use the format '+/-HH:MM'.")
+            print("Invalid timezone format or value. Please use the format '+/-HH:MM'.")
 
 
 def adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone):
     """Adjusts the cron schedule based on the system's and user's timezones."""
+
+    # Get System Timezone:
     try:
-        system_timezone_str = subprocess.check_output(["date", "+%z"]).decode().strip()
-        system_timezone_offset = int(system_timezone_str[:3]) * 60 + int(system_timezone_str[3:])
+        system_timezone_str = subprocess.check_output(["date", "+%z"]).decode().strip()  # e.g., "-0400"
+        system_timezone_offset = int(system_timezone_str[:3]) * 60 + int(
+            system_timezone_str[3:])  # Offset in minutes
     except (subprocess.CalledProcessError, ValueError) as e:
         print(f"Error getting or parsing system timezone: {e}. Using unadjusted schedule.")
+        return cron_schedule  # Fallback if there's an error
+
+    # Parse User-Provided Time:
+    user_time_parts = cron_schedule.split()[:2]  # Get minute and hour parts
+    try:
+        user_hour = int(user_time_parts[1])
+        user_minute = int(user_time_parts[0])
+    except (IndexError, ValueError) as e:
+        print(f"Error parsing user-provided time: {e}. Using unadjusted schedule.")
         return cron_schedule
 
-    # Parse the user-provided time
-    user_time_str = f"{cron_schedule.split()[1]}:{cron_schedule.split()[0]}"  # HH:MM
-    user_datetime = datetime.strptime(user_time_str, "%H:%M").replace(tzinfo=user_timezone)
-
-    # Convert user's time to system time
+    # Create datetime objects for easier manipulation:
+    user_datetime = datetime.now(user_timezone).replace(hour=user_hour, minute=user_minute, second=0, microsecond=0)
     system_datetime = user_datetime.astimezone(timezone(timedelta(minutes=system_timezone_offset)))
 
-    # Update the cron schedule with the adjusted hour and minute
+    # Adjust the cron schedule:
     adjusted_schedule = cron_schedule.split()
     adjusted_schedule[1] = str(system_datetime.hour)
     adjusted_schedule[0] = str(system_datetime.minute)
@@ -96,7 +138,8 @@ def adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone):
 
 
 def configure_gitbuddy():
-    """Configures GitBuddy and creates the executable."""
+    """Configures GitBuddy after confirmation and timezone adjustment."""
+    print("\n--- GitBuddy Configuration ---")
 
     # Check if .env file already exists and handle overwriting
     if os.path.exists(".env"):
@@ -110,12 +153,16 @@ def configure_gitbuddy():
             else:
                 print("Invalid input. Please enter 'yes' or 'no'.")
 
+    # Download main_script.py and install dependencies
+    download_files()
+    install_dependencies()
+
     env_data = get_env_values()
     cron_schedule = get_cron_schedule()
     user_timezone, user_timezone_str = get_user_timezone()
 
     # Adjust cron schedule to system time
-    cron_schedule = adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone)
+    adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone)
 
     env_data["TIMEZONE"] = user_timezone_str  # Store the timezone in the .env file
 
@@ -124,25 +171,17 @@ def configure_gitbuddy():
         for key, value in env_data.items():
             f.write(f"{key}={value}\n")
 
-    # Create executable in the dist folder using PyInstaller
-    print("\nCreating executable...")
-    try:
-        subprocess.run(["pyinstaller", "--onefile", "--distpath", "dist", "main.py"], check=True)
-        print("Executable created successfully!")
-    except subprocess.CalledProcessError as e:
-        print(f"Error creating executable: {e}")
-        return  # Exit if the executable creation fails
-
     # Set up cron job (using python-crontab)
     user_cron = CronTab(user=True)
     job = user_cron.new(
-        command=os.path.abspath(os.path.join("dist", "main")),  # Path to the executable in the dist folder
+        command=f"python3 {os.path.abspath('main.py')}",
         comment="GitBuddy Commit Reminder"
     )
     job.setall(cron_schedule)
     user_cron.write()
 
     print("\nConfiguration complete! GitBuddy is ready to remind you about commits.")
+
 
 if __name__ == "__main__":
     configure_gitbuddy()
