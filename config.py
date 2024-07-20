@@ -65,17 +65,30 @@ def get_cron_schedule():
 
     if schedule_type == "daily":
         hour = int(input("Enter hour (0-23) in your local time: "))
-        minute = int(input("Enter minute (0-59) in your local time: "))
+        minute = int(input("Enter minute (0-59) in your local time: ")) - 1
+        if minute == -1:
+            minute = 59
+            hour -= 1
+            if hour == -1:
+                hour = 23
         return f"{minute} {hour} * * *"
 
     elif schedule_type == "weekly":
         day = int(input("Enter day of the week (0=Sunday, 1=Monday, etc.): "))
         hour = int(input("Enter hour (0-23) in your local time: "))
-        minute = int(input("Enter minute (0-59) in your local time: "))
+        minute = int(input("Enter minute (0-59) in your local time: ")) - 1
+        if minute == -1:
+            minute = 59
+            hour -= 1
+            if hour == -1:
+                hour = 23
+                day = (day - 1) % 7
         return f"{minute} {hour} * * {day}"
 
     elif schedule_type == "hourly":
-        minute = int(input("Enter minute (0-59) in your local time: "))
+        minute = int(input("Enter minute (0-59) in your local time: ")) - 1
+        if minute == -1:
+            minute = 59
         return f"{minute} * * * *"
 
     elif schedule_type == "custom":
