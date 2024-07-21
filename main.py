@@ -122,5 +122,6 @@ if __name__ == "__main__":
             break
         else:
             template = random.choice(whatsapp_notifier.templates)
-            whatsapp_notifier.send_message(template, datetime.now().astimezone(user_timezone).strftime("%H:%M"))
+            time_to_send = datetime.now().astimezone(user_timezone) + timedelta(minutes=1)
+            whatsapp_notifier.send_message(template, time_to_send.strftime("%H:%M"))
             time.sleep(check_interval_minutes * 60)
