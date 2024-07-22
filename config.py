@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from datetime import datetime, timedelta, timezone
 
 import requests
@@ -188,8 +189,12 @@ def configure_gitbuddy():
     print("To view or edit the cron job, run 'crontab -e'.")
     print("To uninstall GitBuddy, simply delete the .env and main.py files.")
 
-    os.remove(__file__)
-    os.remove("requirements.txt")
+    script_dir = os.path.dirname(sys.executable)
+    script_path = os.path.join(script_dir, "config")  # Assuming your script is named "config"
+
+    # Schedule self-deletion after a short delay
+    subprocess.Popen(["sleep", "5", "&&", "rm", "-f", script_path, os.path.join(script_dir, "requirements.txt")],
+                     shell=False)
 
 
 if __name__ == "__main__":
