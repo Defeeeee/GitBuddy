@@ -14,9 +14,9 @@ GitBuddy is a simple yet handy script that reminds you to make your daily GitHub
 
 1. **Download the current version binaries**
    ```bash
-   wget https://github.com/Defeeeee/GitBuddy/releases/download/2.0.1/GitBuddy2.0.1.tar.gz
-   tar -xvzf GitBuddy2.0.1.tar.gz
-   cd GitBuddy2.0.1
+   wget https://github.com/Defeeeee/GitBuddy/releases/download/2.1.2/GitBuddy-2.1.2.tgz
+   tar -xvzf GitBuddy-2.1.2.tgz
+   cd GitBuddy-2.1.2
    ```
 
 2. **Run config executable and follow the instructions:**
