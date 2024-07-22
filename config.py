@@ -128,7 +128,7 @@ def adjust_cron_schedule_to_system_timezone(cron_schedule, user_timezone):
         return cron_schedule
 
     # Parse the user-provided time
-    user_time_str = f"{cron_schedule.split()[1]}:{cron_schedule.split()[0]}" # HH:MM
+    user_time_str = f"{cron_schedule.split()[1]}:{cron_schedule.split()[0]}"  # HH:MM
     user_datetime = datetime.strptime(user_time_str, "%H:%M").replace(tzinfo=user_timezone)
 
     # Convert user's time to system time
