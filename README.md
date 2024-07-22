@@ -12,28 +12,19 @@ GitBuddy is a simple yet handy script that reminds you to make your daily GitHub
 
 ## Installation
 
-1. **Clone the Repository:**
+1. **Download the current version binaries**
    ```bash
-   git clone https://github.com/Defeeeee/GitBuddy.git
-   cd GitBuddy
+   wget https://github.com/Defeeeee/GitBuddy/releases/download/2.0.1/GitBuddy2.0.1.tar.gz
+   tar -xvzf GitBuddy2.0.1.tar.gz
+   cd GitBuddy2.0.1
    ```
 
-2. **Create and Activate a Virtual Environment (Recommended):**
+2. **Run config executable and follow the instructions:**
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate 
+   ./config
    ```
-
-3. **Install Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Run the Configuration Script:**
-   ```bash
-   python config.py
-   ```
-   - The script will guide you through setting up:
+   - The script will fetch the files from the repo and install dependencies
+   - The script will also guide you through setting up:
       - Your WhatsApp Business API credentials (`URL`, `WHATSAPP_ACCESS_TOKEN`)
       - Your phone number (`PHONE_NUMBER`)
       - Your GitHub username (`GITHUB_USERNAME`)
