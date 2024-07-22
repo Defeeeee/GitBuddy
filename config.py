@@ -185,6 +185,11 @@ def configure_gitbuddy():
     user_cron.write()
 
     print("\nConfiguration complete! GitBuddy is ready to remind you about commits.")
+    print("To view or edit the cron job, run 'crontab -e'.")
+    print("To uninstall GitBuddy, simply delete the .env and main.py files.")
+
+    os.remove(__file__)
+    os.remove("requirements.txt")
 
 
 if __name__ == "__main__":
