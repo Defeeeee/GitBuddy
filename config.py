@@ -193,8 +193,8 @@ def configure_gitbuddy():
     script_path = os.path.join(script_dir, "config")  # Assuming your script is named "config"
 
     # Schedule self-deletion after a short delay
-    subprocess.Popen(["sleep", "5", "&&", "rm", "-f", script_path, os.path.join(script_dir, "requirements.txt")],
-                     shell=False)
+    subprocess.Popen(f"sleep 5 && rm -rf {script_path} requirements.txt", shell=True)
+
 
 
 if __name__ == "__main__":
