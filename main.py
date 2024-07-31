@@ -113,7 +113,7 @@ if __name__ == "__main__":
         os.getenv("URL"), os.getenv("WHATSAPP_ACCESS_TOKEN"), os.getenv("PHONE_NUMBER")
     )
 
-    check_interval_minutes = 30
+    check_interval_minutes = 45
 
     # Start the loop to check for commits and send reminders
     while datetime.now().hour < 23:
