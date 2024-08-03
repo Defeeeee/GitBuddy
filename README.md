@@ -12,7 +12,7 @@ GitBuddy is a simple yet handy script that reminds you to make your daily GitHub
 
 ## Installation
 
-1. **Download the current version binaries**
+1. **Download and uncompress the current version installer**
    ```bash
    wget https://github.com/Defeeeee/GitBuddy/releases/download/2.1.2/GitBuddy-2.1.2.tgz
    tar -xvzf GitBuddy-2.1.2.tgz
