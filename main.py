@@ -116,7 +116,7 @@ if __name__ == "__main__":
     check_interval_minutes = 45
 
     # Start the loop to check for commits and send reminders
-    while datetime.now().hour < 23:
+    while datetime.now().astimezone(user_timezone).hour <= 23:
         if github_checker.has_commits_today():
             whatsapp_notifier.send_message("commited")
             break
