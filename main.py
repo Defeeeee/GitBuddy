@@ -114,13 +114,25 @@ if __name__ == "__main__":
     )
 
     check_interval_minutes = 45
+    start_day = datetime.now().astimezone(user_timezone).day
 
     # Start the loop to check for commits and send reminders
-    while datetime.now().astimezone(user_timezone).hour <= 23:
+    while datetime.now().astimezone(user_timezone).hour <= 23 and start_day == datetime.now().astimezone(user_timezone).day:
         if github_checker.has_commits_today():
             whatsapp_notifier.send_message("commited")
             break
         else:
+            time_in_hours = datetime.now().astimezone(user_timezone).hour if not datetime.now().astimezone(user_timezone).minute else datetime.now().astimezone(user_timezone).hour + datetime.now().astimezone(user_timezone).minute / 60
+            if 24 - time_in_hours < check_interval_minutes / 60:
+                time_to_send = datetime.now().astimezone(user_timezone) + timedelta(minutes=1)
+                whatsapp_notifier.send_message("last_chance", time_to_send.strftime("%H:%M"))
+                time.sleep(1800)
+                if github_checker.has_commits_today():
+                    whatsapp_notifier.send_message("commited")
+                else:
+                    time_to_send = datetime.now().astimezone(user_timezone) + timedelta(minutes=1)
+                    whatsapp_notifier.send_message("last_chance", time_to_send.strftime("%H:%M"))
+                break
             template = random.choice(whatsapp_notifier.templates)
             time_to_send = datetime.now().astimezone(user_timezone) + timedelta(minutes=1)
             whatsapp_notifier.send_message(template, time_to_send.strftime("%H:%M"))
