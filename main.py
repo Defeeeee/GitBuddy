@@ -126,7 +126,8 @@ if __name__ == "__main__":
             if 24 - time_in_hours < check_interval_minutes / 60:
                 time_to_send = datetime.now().astimezone(user_timezone) + timedelta(minutes=1)
                 whatsapp_notifier.send_message("last_chance", time_to_send.strftime("%H:%M"))
-                time.sleep(1800)
+                time_to_00 = (24 - time_in_hours) * 60 * 60 - 1
+                time.sleep(time_to_00)
                 if github_checker.has_commits_today():
                     whatsapp_notifier.send_message("commited")
                 else:
